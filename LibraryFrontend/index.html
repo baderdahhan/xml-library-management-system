@@ -1,0 +1,303 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Library Management System</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link href="css/styles.css" rel="stylesheet">
+</head>
+<body>
+    <!-- Login Modal -->
+    <div class="modal fade" id="loginModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Login</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="loginForm">
+                        <div class="mb-3">
+                            <label for="username" class="form-label">Username</label>
+                            <input type="text" class="form-control" id="username" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="password" class="form-label">Password</label>
+                            <input type="password" class="form-control" id="password" required>
+                        </div>
+                        <button type="submit" class="btn btn-primary w-100">Login</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Navigation -->
+    <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="#">Library Management</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav me-auto">
+                    <li class="nav-item">
+                        <a class="nav-link active" href="#" data-section="books">Books</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#" data-section="members">Members</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#" data-section="borrowings">Borrowings</a>
+                    </li>
+                </ul>
+                <div class="d-flex">
+                    <span class="navbar-text me-3" id="userInfo"></span>
+                    <button class="btn btn-outline-light" id="logoutBtn">Logout</button>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <div class="container-fluid mt-4">
+        <!-- Books Section -->
+        <div id="booksSection" class="content-section">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h2>Books</h2>
+                <div>
+                    <button class="btn btn-primary" id="addBookBtn">
+                        <i class="fas fa-plus"></i> Add Book
+                    </button>
+                    <button class="btn btn-secondary" id="searchBookBtn">
+                        <i class="fas fa-search"></i> Search
+                    </button>
+                </div>
+            </div>
+            <div class="table-responsive">
+                <table class="table table-striped" id="booksTable">
+                    <thead>
+                        <tr>
+                            <th>ISBN</th>
+                            <th>Title</th>
+                            <th>Author</th>
+                            <th>Publisher</th>
+                            <th>Year</th>
+                            <th>Genre</th>
+                            <th>Available</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody></tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Members Section -->
+        <div id="membersSection" class="content-section d-none">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h2>Members</h2>
+                <button class="btn btn-primary" id="addMemberBtn">
+                    <i class="fas fa-plus"></i> Add Member
+                </button>
+            </div>
+            <div class="table-responsive">
+                <table class="table table-striped" id="membersTable">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Name</th>
+                            <th>Email</th>
+                            <th>Phone</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody></tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Borrowings Section -->
+        <div id="borrowingsSection" class="content-section d-none">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h2>Borrowings</h2>
+                <button class="btn btn-primary" id="addBorrowingBtn">
+                    <i class="fas fa-plus"></i> New Borrowing
+                </button>
+            </div>
+            <div class="table-responsive">
+                <table class="table table-striped" id="borrowingsTable">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Book</th>
+                            <th>Member</th>
+                            <th>Borrow Date</th>
+                            <th>Return Date</th>
+                            <th>Status</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody></tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- Add/Edit Book Modal -->
+    <div class="modal fade" id="bookModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Add Book</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="bookForm">
+                        <input type="hidden" id="bookId">
+                        <div class="mb-3">
+                            <label for="isbn" class="form-label">ISBN</label>
+                            <input type="text" class="form-control" id="isbn" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="title" class="form-label">Title</label>
+                            <input type="text" class="form-control" id="title" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="author" class="form-label">Author</label>
+                            <input type="text" class="form-control" id="author" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="publisher" class="form-label">Publisher</label>
+                            <input type="text" class="form-control" id="publisher" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="publicationYear" class="form-label">Publication Year</label>
+                            <input type="number" class="form-control" id="publicationYear" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="genre" class="form-label">Genre</label>
+                            <input type="text" class="form-control" id="genre" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="totalCopies" class="form-label">Total Copies</label>
+                            <input type="number" class="form-control" id="totalCopies" required>
+                        </div>
+                        <button type="submit" class="btn btn-primary w-100">Save</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Add/Edit Member Modal -->
+    <div class="modal fade" id="memberModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Add Member</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="memberForm">
+                        <input type="hidden" id="memberId">
+                        <div class="mb-3">
+                            <label for="memberName" class="form-label">Name</label>
+                            <input type="text" class="form-control" id="memberName" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="memberEmail" class="form-label">Email</label>
+                            <input type="email" class="form-control" id="memberEmail" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="memberPhone" class="form-label">Phone</label>
+                            <input type="tel" class="form-control" id="memberPhone" required>
+                        </div>
+                        <button type="submit" class="btn btn-primary w-100">Save</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Add/Edit Borrowing Modal -->
+    <div class="modal fade" id="borrowingModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">New Borrowing</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="borrowingForm">
+                        <input type="hidden" id="borrowingId">
+                        <div class="mb-3">
+                            <label for="borrowingBook" class="form-label">Book</label>
+                            <select class="form-select" id="borrowingBook" required></select>
+                        </div>
+                        <div class="mb-3">
+                            <label for="borrowingMember" class="form-label">Member</label>
+                            <select class="form-select" id="borrowingMember" required></select>
+                        </div>
+                        <div class="mb-3">
+                            <label for="borrowDate" class="form-label">Borrow Date</label>
+                            <input type="date" class="form-control" id="borrowDate" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="returnDate" class="form-label">Return Date</label>
+                            <input type="date" class="form-control" id="returnDate" required>
+                        </div>
+                        <button type="submit" class="btn btn-primary w-100">Save</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Search Book Modal -->
+    <div class="modal fade" id="searchBookModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Search Books</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="searchBookForm">
+                        <div class="mb-3">
+                            <label for="searchTitle" class="form-label">Title</label>
+                            <input type="text" class="form-control" id="searchTitle">
+                        </div>
+                        <div class="mb-3">
+                            <label for="searchAuthor" class="form-label">Author</label>
+                            <input type="text" class="form-control" id="searchAuthor">
+                        </div>
+                        <div class="mb-3">
+                            <label for="searchIsbn" class="form-label">ISBN</label>
+                            <input type="text" class="form-control" id="searchIsbn">
+                        </div>
+                        <div class="mb-3">
+                            <label for="searchGenre" class="form-label">Genre</label>
+                            <input type="text" class="form-control" id="searchGenre">
+                        </div>
+                        <div class="mb-3">
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" id="searchAvailable">
+                                <label class="form-check-label" for="searchAvailable">
+                                    Available Only
+                                </label>
+                            </div>
+                        </div>
+                        <button type="submit" class="btn btn-primary w-100">Search</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="js/app.js"></script>
+</body>
+</html> 

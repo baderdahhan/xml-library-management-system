@@ -1,0 +1,11 @@
+<!ELEMENT Books (Book+)>
+<!ELEMENT Book (Id, ISBN, Title, Author, Publisher, PublicationYear, Genre, AvailableCopies, TotalCopies)>
+<!ELEMENT Id (#PCDATA)>
+<!ELEMENT ISBN (#PCDATA)>
+<!ELEMENT Title (#PCDATA)>
+<!ELEMENT Author (#PCDATA)>
+<!ELEMENT Publisher (#PCDATA)>
+<!ELEMENT PublicationYear (#PCDATA)>
+<!ELEMENT Genre (#PCDATA)>
+<!ELEMENT AvailableCopies (#PCDATA)>
+<!ELEMENT TotalCopies (#PCDATA)>

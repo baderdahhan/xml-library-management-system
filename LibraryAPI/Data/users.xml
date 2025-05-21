@@ -1,0 +1,4 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Users xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+	<User Id="1" Username="admin" PasswordHash="JAvlGPq9JyTdtvBO6x2llnRI1+gxwIyPqCKAn3THIKk=" Role="Admin" />
+</Users>

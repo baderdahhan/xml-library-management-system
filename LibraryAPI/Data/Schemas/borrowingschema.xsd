@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema">
+	<xs:element name="Borrowings">
+		<xs:complexType>
+			<xs:sequence>
+				<xs:element name="Borrowing" maxOccurs="unbounded">
+					<xs:complexType>
+						<xs:sequence>
+							<xs:element name="BookId" type="xs:integer"/>
+							<xs:element name="MemberId" type="xs:integer"/>
+							<xs:element name="BorrowDate" type="xs:date"/>
+							<xs:element name="DueDate" type="xs:date"/>
+							<xs:element name="ReturnDate" type="xs:date" nillable="true"/>
+							<xs:element name="Status">
+								<xs:simpleType>
+									<xs:restriction base="xs:string">
+										<xs:enumeration value="Borrowed"/>
+										<xs:enumeration value="Returned"/>
+										<xs:enumeration value="Overdue"/>
+									</xs:restriction>
+								</xs:simpleType>
+							</xs:element>
+						</xs:sequence>
+						<xs:attribute name="Id" type="xs:integer" use="required"/>
+					</xs:complexType>
+				</xs:element>
+			</xs:sequence>
+		</xs:complexType>
+	</xs:element>
+</xs:schema>

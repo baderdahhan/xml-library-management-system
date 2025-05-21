@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Books xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+  <Book Id="1">
+    <ISBN>9780593201060</ISBN>
+    <Title>The Great Gatsby</Title>
+    <Author>F. Scott Fitzgerald</Author>
+    <Publisher>PenguinRandomHouse.com</Publisher>
+    <PublicationYear>1925</PublicationYear>
+    <Genre>novel</Genre>
+    <AvailableCopies>5</AvailableCopies>
+    <TotalCopies>24</TotalCopies>
+  </Book>
+  <Book Id="2">
+    <ISBN>9780395159934</ISBN>
+    <Title>Curious George</Title>
+    <Author>Margret Rey</Author>
+    <Publisher>Houghton Mifflin</Publisher>
+    <PublicationYear>1941</PublicationYear>
+    <Genre>Children's literature</Genre>
+    <AvailableCopies>25</AvailableCopies>
+    <TotalCopies>100</TotalCopies>
+  </Book>
+  <Book Id="3">
+    <ISBN>abb</ISBN>
+    <Title>baba</Title>
+    <Author>babab</Author>
+    <Publisher>bab</Publisher>
+    <PublicationYear>1234</PublicationYear>
+    <Genre>bab</Genre>
+    <AvailableCopies>0</AvailableCopies>
+    <TotalCopies>6</TotalCopies>
+  </Book>
+  <Book Id="4">
+    <ISBN>dsad</ISBN>
+    <Title>dsad</Title>
+    <Author>sads</Author>
+    <Publisher>sad</Publisher>
+    <PublicationYear>1234</PublicationYear>
+    <Genre>sad</Genre>
+    <AvailableCopies>1</AvailableCopies>
+    <TotalCopies>11</TotalCopies>
+  </Book>
+</Books>

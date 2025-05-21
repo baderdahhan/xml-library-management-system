@@ -1,0 +1,11 @@
+<!ELEMENT Members (MemberList)>
+<!ELEMENT MemberList (Member*)>
+<!ELEMENT Member (Id, FirstName, LastName, Email, PhoneNumber, Address, MembershipDate, Status)>
+<!ELEMENT Id (#PCDATA)>
+<!ELEMENT FirstName (#PCDATA)>
+<!ELEMENT LastName (#PCDATA)>
+<!ELEMENT Email (#PCDATA)>
+<!ELEMENT PhoneNumber (#PCDATA)>
+<!ELEMENT Address (#PCDATA)>
+<!ELEMENT MembershipDate (#PCDATA)>
+<!ELEMENT Status (#PCDATA)>

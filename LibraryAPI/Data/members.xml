@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Members xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+  <Member Id="1">
+    <FirstName>bader</FirstName>
+    <LastName>dahhan</LastName>
+    <Email>bader-dahhan@outlook.com</Email>
+    <PhoneNumber>5550511711</PhoneNumber>
+    <Address>50.yil mah</Address>
+    <MembershipDate>2025-05-17</MembershipDate>
+    <Status>Active</Status>
+  </Member>
+  <Member Id="2">
+    <FirstName>ali</FirstName>
+    <LastName>zade</LastName>
+    <Email>ali@hotmail.com</Email>
+    <PhoneNumber>5550555555</PhoneNumber>
+    <Address>mezitli </Address>
+    <MembershipDate>2025-05-20</MembershipDate>
+    <Status>Active</Status>
+  </Member>
+  <Member Id="3">
+    <FirstName>bader</FirstName>
+    <LastName>dahhan</LastName>
+    <Email>bader@hotmail.com</Email>
+    <PhoneNumber>5550511711</PhoneNumber>
+    <Address>50.yil mah </Address>
+    <MembershipDate>2025-05-21</MembershipDate>
+    <Status>Active</Status>
+  </Member>
+  <Member Id="4">
+    <FirstName>bader</FirstName>
+    <LastName>daggan</LastName>
+    <Email>bader@email.com</Email>
+    <PhoneNumber>55505117611</PhoneNumber>
+    <Address>sadsa</Address>
+    <MembershipDate>2025-05-21</MembershipDate>
+    <Status>Active</Status>
+  </Member>
+  <Member Id="5">
+    <FirstName>dsa</FirstName>
+    <LastName>daggan</LastName>
+    <Email>dsad@email.com</Email>
+    <PhoneNumber>55505117611</PhoneNumber>
+    <Address>dawdsa</Address>
+    <MembershipDate>2025-05-21</MembershipDate>
+    <Status>Suspended</Status>
+  </Member>
+</Members>

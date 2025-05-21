@@ -1,0 +1,10 @@
+<!ELEMENT Borrowings (BorrowingList)>
+<!ELEMENT BorrowingList (Borrowing*)>
+<!ELEMENT Borrowing (Id, BookId, MemberId, BorrowDate, DueDate, ReturnDate, Status)>
+<!ELEMENT Id (#PCDATA)>
+<!ELEMENT BookId (#PCDATA)>
+<!ELEMENT MemberId (#PCDATA)>
+<!ELEMENT BorrowDate (#PCDATA)>
+<!ELEMENT DueDate (#PCDATA)>
+<!ELEMENT ReturnDate (#PCDATA)>
+<!ELEMENT Status (#PCDATA)>

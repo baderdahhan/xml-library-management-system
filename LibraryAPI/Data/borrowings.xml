@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Borrowings xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+  <Borrowing Id="1">
+    <BookId>1</BookId>
+    <MemberId>1</MemberId>
+    <BorrowDate>2025-05-17</BorrowDate>
+    <DueDate>2025-05-31</DueDate>
+    <ReturnDate>2025-05-17</ReturnDate>
+    <Status>Returned</Status>
+  </Borrowing>
+  <Borrowing Id="2">
+    <BookId>2</BookId>
+    <MemberId>1</MemberId>
+    <BorrowDate>2025-05-17</BorrowDate>
+    <DueDate>2025-05-31</DueDate>
+    <ReturnDate>2025-05-17</ReturnDate>
+    <Status>Returned</Status>
+  </Borrowing>
+  <Borrowing Id="3">
+    <BookId>1</BookId>
+    <MemberId>1</MemberId>
+    <BorrowDate>2025-05-17</BorrowDate>
+    <DueDate>2025-05-31</DueDate>
+    <ReturnDate>2025-05-21</ReturnDate>
+    <Status>Returned</Status>
+  </Borrowing>
+  <Borrowing Id="4">
+    <BookId>1</BookId>
+    <MemberId>2</MemberId>
+    <BorrowDate>2025-05-20</BorrowDate>
+    <DueDate>2025-06-03</DueDate>
+    <ReturnDate>2025-05-21</ReturnDate>
+    <Status>Returned</Status>
+  </Borrowing>
+  <Borrowing Id="5">
+    <BookId>1</BookId>
+    <MemberId>1</MemberId>
+    <BorrowDate>2025-05-20</BorrowDate>
+    <DueDate>2025-06-03</DueDate>
+    <ReturnDate xsi:nil="true" />
+    <Status>Borrowed</Status>
+  </Borrowing>
+  <Borrowing Id="6">
+    <BookId>1</BookId>
+    <MemberId>5</MemberId>
+    <BorrowDate>2025-05-21</BorrowDate>
+    <DueDate>2025-06-04</DueDate>
+    <ReturnDate xsi:nil="true" />
+    <Status>Borrowed</Status>
+  </Borrowing>
+  <Borrowing Id="7">
+    <BookId>1</BookId>
+    <MemberId>1</MemberId>
+    <BorrowDate>2025-05-21</BorrowDate>
+    <DueDate>2025-06-04</DueDate>
+    <ReturnDate xsi:nil="true" />
+    <Status>Borrowed</Status>
+  </Borrowing>
+  <Borrowing Id="8">
+    <BookId>1</BookId>
+    <MemberId>1</MemberId>
+    <BorrowDate>2025-05-21</BorrowDate>
+    <DueDate>2025-06-04</DueDate>
+    <ReturnDate>2025-05-21</ReturnDate>
+    <Status>Returned</Status>
+  </Borrowing>
+  <Borrowing Id="9">
+    <BookId>3</BookId>
+    <MemberId>1</MemberId>
+    <BorrowDate>2025-05-21</BorrowDate>
+    <DueDate>2025-06-04</DueDate>
+    <ReturnDate xsi:nil="true" />
+    <Status>Borrowed</Status>
+  </Borrowing>
+  <Borrowing Id="10">
+    <BookId>3</BookId>
+    <MemberId>1</MemberId>
+    <BorrowDate>2025-05-21</BorrowDate>
+    <DueDate>2025-06-04</DueDate>
+    <ReturnDate xsi:nil="true" />
+    <Status>Borrowed</Status>
+  </Borrowing>
+</Borrowings>
