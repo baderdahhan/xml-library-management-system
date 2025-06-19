@@ -1,4 +1,4 @@
-// Global state
+// Global State
 let isAuthenticated = false;
 let currentUser = null;
 let currentRole = null;
@@ -10,7 +10,7 @@ const BOOKS_API = `${API_BASE_URL}/api/books`;
 const MEMBERS_API = `${API_BASE_URL}/api/members`;
 const BORROWINGS_API = `${API_BASE_URL}/api/borrowings`;
 
-// Initialize Bootstrap modals
+// Initialize Bootstrap Modals
 const loginModal = new bootstrap.Modal(document.getElementById('loginModal'));
 const bookModal = new bootstrap.Modal(document.getElementById('bookModal'));
 const memberModal = new bootstrap.Modal(document.getElementById('memberModal'));
@@ -18,66 +18,49 @@ const borrowingModal = new bootstrap.Modal(document.getElementById('borrowingMod
 const searchModal = new bootstrap.Modal(document.getElementById('searchModal'));
 
 // Event Listeners
+
 document.addEventListener('DOMContentLoaded', () => {
-    // Navigation
     document.querySelectorAll('.nav-link').forEach(link => {
-        link.addEventListener('click', (e) => {
+        link.addEventListener('click', e => {
             e.preventDefault();
-            const section = e.target.dataset.section;
-            showSection(section);
+            showSection(e.target.dataset.section);
         });
     });
 
-    // Logout
     document.getElementById('logoutBtn').addEventListener('click', logout);
-
-    // Forms
     document.getElementById('loginForm').addEventListener('submit', handleLogin);
-    document.getElementById('bookForm').addEventListener('submit', (e) => e.preventDefault());
-    document.getElementById('memberForm').addEventListener('submit', (e) => e.preventDefault());
-    document.getElementById('borrowingForm').addEventListener('submit', (e) => e.preventDefault());
-    document.getElementById('searchForm').addEventListener('submit', (e) => e.preventDefault());
 
-    // Always show login on startup
+    ['bookForm', 'memberForm', 'borrowingForm', 'searchForm'].forEach(formId => {
+        document.getElementById(formId).addEventListener('submit', e => e.preventDefault());
+    });
+
     isAuthenticated = false;
     localStorage.removeItem('token');
     updateUI();
     loginModal.show();
-    
-    // Add event listener for borrowing status change
+
     const borrowingStatus = document.getElementById('borrowingStatus');
     if (borrowingStatus) {
-        borrowingStatus.addEventListener('change', function() {
-            const returnDateGroup = document.getElementById('returnDateGroup');
-            if (this.value === 'Returned') {
-                returnDateGroup.style.display = 'block';
-                document.getElementById('returnDate').required = true;
-                document.getElementById('returnDate').value = new Date().toISOString().split('T')[0];
-            } else {
-                returnDateGroup.style.display = 'none';
-                document.getElementById('returnDate').required = false;
-            }
-        });
+        borrowingStatus.addEventListener('change', handleBorrowingStatusChange);
     }
 });
 
 // Authentication
+
 async function handleLogin(e) {
     e.preventDefault();
     const username = document.getElementById('username').value;
     const password = document.getElementById('password').value;
 
     try {
-        const response = await fetch(`${AUTH_API}/login`, {
+        const res = await fetch(`${AUTH_API}/login`, {
             method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
+            headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ username, password })
         });
 
-        if (response.ok) {
-            const data = await response.json();
+        if (res.ok) {
+            const data = await res.json();
             localStorage.setItem('token', data.token);
             isAuthenticated = true;
             currentUser = username;
@@ -89,8 +72,8 @@ async function handleLogin(e) {
         } else {
             showToast('Invalid credentials', 'error');
         }
-    } catch (error) {
-        console.error('Login failed:', error);
+    } catch (err) {
+        console.error('Login failed:', err);
         showToast('Login failed', 'error');
     }
 }
@@ -104,13 +87,9 @@ function logout() {
     loginModal.show();
 }
 
-// UI Updates
 function updateUI() {
-    const navLinks = document.querySelectorAll('.nav-link');
-    const logoutBtn = document.getElementById('logoutBtn');
-    
-    navLinks.forEach(link => link.style.display = isAuthenticated ? 'block' : 'none');
-    logoutBtn.style.display = isAuthenticated ? 'block' : 'none';
+    document.querySelectorAll('.nav-link').forEach(link => link.style.display = isAuthenticated ? 'block' : 'none');
+    document.getElementById('logoutBtn').style.display = isAuthenticated ? 'block' : 'none';
 }
 
 function showSection(section) {
@@ -118,422 +97,207 @@ function showSection(section) {
     document.getElementById(`${section}Section`).style.display = 'block';
 }
 
-// Data Loading
+// Load Data
+
 async function loadData() {
-    await Promise.all([
-        loadBooks(),
-        loadMembers(),
-        loadBorrowings()
-    ]);
+    await Promise.all([loadBooks(), loadMembers(), loadBorrowings()]);
 }
 
 async function loadBooks() {
     try {
-        const response = await fetch(BOOKS_API, {
-            headers: getAuthHeaders()
-        });
-        if (response.ok) {
-            const books = await response.json();
+        const res = await fetch(BOOKS_API, { headers: getAuthHeaders() });
+        if (res.ok) {
+            const books = await res.json();
             renderBooksTable(books);
         }
-    } catch (error) {
-        console.error('Failed to load books:', error);
+    } catch (err) {
+        console.error('Failed to load books:', err);
         showToast('Failed to load books', 'error');
     }
 }
 
 async function loadMembers() {
     try {
-        const response = await fetch(`${MEMBERS_API}`, {
-            headers: getAuthHeaders()
-        });
-        if (!response.ok) throw new Error('Failed to load members');
-        const data = await response.json();
-        console.log('Members API response:', data);
-        
-        // Extract the member list - the API returns an object with memberList property
+        const res = await fetch(MEMBERS_API, { headers: getAuthHeaders() });
+        if (!res.ok) throw new Error('Failed to load members');
+        const data = await res.json();
         const members = data.memberList || [];
-        
-        if (!Array.isArray(members)) {
-            console.error('Invalid members data format. Expected array, got:', typeof members);
-            showToast('Failed to process members data', 'error');
-            return;
-        }
-        
+        if (!Array.isArray(members)) throw new Error('Invalid members format');
         renderMembersTable(members);
-    } catch (error) {
-        console.error('Failed to load members:', error);
+    } catch (err) {
+        console.error('Failed to load members:', err);
         showToast('Failed to load members', 'error');
     }
 }
 
 async function loadBorrowings() {
     try {
-        const response = await fetch(`${BORROWINGS_API}`, {
-            headers: getAuthHeaders()
-        });
-        if (!response.ok) throw new Error('Failed to load borrowings');
-        const data = await response.json();
-        
-        // Handle both possible response formats
+        const res = await fetch(BORROWINGS_API, { headers: getAuthHeaders() });
+        if (!res.ok) throw new Error('Failed to load borrowings');
+        const data = await res.json();
         const borrowings = data.borrowingList || data;
-        
-        if (!Array.isArray(borrowings)) {
-            console.error('Expected array of borrowings, got:', data);
-            showToast('Failed to load borrowings: invalid response format', 'error');
-            return;
-        }
-        
+        if (!Array.isArray(borrowings)) throw new Error('Invalid borrowings format');
         renderBorrowingsTable(borrowings);
-    } catch (error) {
-        console.error('Failed to load borrowings:', error);
+    } catch (err) {
+        console.error('Failed to load borrowings:', err);
         showToast('Failed to load borrowings', 'error');
     }
 }
 
-// Table Rendering
+// Rendering Tables
+
 function renderBooksTable(books) {
     const tbody = document.getElementById('booksTableBody');
-    if (!Array.isArray(books) || books.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="6">No books found</td></tr>';
-        return;
-    }
-    
-    tbody.innerHTML = books.map(book => `
+    tbody.innerHTML = books.length ? books.map(book => `
         <tr>
             <td>${book.id}</td>
             <td>${book.title}</td>
             <td>${book.author}</td>
-            <td>${book.isbn}</td>
+            <td>${book.isbn}</td>     
             <td><span class="badge ${getStatusBadgeClass(book.status)}">${book.status}</span></td>
             <td>
-                <button class="btn btn-sm btn-primary me-1" onclick="editBook(${book.id})">
-                    <i class="fas fa-edit"></i>
-                </button>
-                <button class="btn btn-sm btn-danger" onclick="deleteBook(${book.id})">
-                    <i class="fas fa-trash"></i>
-                </button>
+                <button class="btn btn-sm btn-primary me-1" onclick="editBook(${book.id})"><i class="fas fa-edit"></i></button>
+                <button class="btn btn-sm btn-danger" onclick="deleteBook(${book.id})"><i class="fas fa-trash"></i></button>
             </td>
         </tr>
-    `).join('');
+    `).join('') : '<tr><td colspan="6">No books found</td></tr>';
 }
 
 function renderMembersTable(members) {
     const tbody = document.getElementById('membersTableBody');
-    if (!Array.isArray(members) || members.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="5">No members found</td></tr>';
-        return;
-    }
-    
-    tbody.innerHTML = members.map(member => `
+    tbody.innerHTML = members.length ? members.map(member => `
         <tr>
             <td>${member.id}</td>
             <td>${member.firstName || ''} ${member.lastName || ''}</td>
             <td>${member.email || ''}</td>
             <td>${member.phoneNumber || ''}</td>
             <td>
-                <button class="btn btn-sm btn-primary me-1" onclick="editMember(${member.id})">
-                    <i class="fas fa-edit"></i>
-                </button>
-                <button class="btn btn-sm btn-danger" onclick="deleteMember(${member.id})">
-                    <i class="fas fa-trash"></i>
-                </button>
+                <button class="btn btn-sm btn-primary me-1" onclick="editMember(${member.id})"><i class="fas fa-edit"></i></button>
+                <button class="btn btn-sm btn-danger" onclick="deleteMember(${member.id})"><i class="fas fa-trash"></i></button>
             </td>
         </tr>
-    `).join('');
+    `).join('') : '<tr><td colspan="5">No members found</td></tr>';
 }
 
 function renderBorrowingsTable(borrowings) {
     const tbody = document.getElementById('borrowingsTableBody');
-    if (!Array.isArray(borrowings) || borrowings.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="7">No borrowings found</td></tr>';
-        return;
-    }
-    
-    tbody.innerHTML = borrowings.map(borrowing => {
-        // Extract member name, handling all possible data structures
-        let memberName = 'N/A';
-        if (borrowing.member) {
-            memberName = `${borrowing.member.firstName || ''} ${borrowing.member.lastName || ''}`.trim();
-        } else if (borrowing.memberName) {
-            memberName = borrowing.memberName;
-        } else if (borrowing.memberFirstName || borrowing.memberLastName) {
-            memberName = `${borrowing.memberFirstName || ''} ${borrowing.memberLastName || ''}`.trim();
-        }
-        
-        // Extract book title, handling all possible data structures
-        const bookTitle = borrowing.book?.title || borrowing.bookTitle || 'N/A';
-        
-        // Handle return date display
-        let returnDateDisplay;
-        if (borrowing.status === 'Returned' && borrowing.returnDate) {
-            returnDateDisplay = formatDate(borrowing.returnDate);
-        } else if (borrowing.status === 'Borrowed' || borrowing.status === 'Overdue') {
-            // For borrowed books, calculate due date (14 days from borrow date)
-            const borrowDate = new Date(borrowing.borrowDate);
-            const dueDate = new Date(borrowDate);
-            dueDate.setDate(dueDate.getDate() + 14);
-            returnDateDisplay = `Due: ${formatDate(dueDate)}`;
-        } else {
-            returnDateDisplay = 'N/A';
-        }
-        
-        return `
+    tbody.innerHTML = borrowings.length ? borrowings.map(b => `
         <tr>
-            <td>${borrowing.id}</td>
-            <td>${bookTitle}</td>
-            <td>${memberName}</td>
-            <td>${formatDate(borrowing.borrowDate)}</td>
-            <td>${returnDateDisplay}</td>
-            <td><span class="badge ${getStatusBadgeClass(borrowing.status)}">${borrowing.status}</span></td>
-            <td>
-                <button class="btn btn-sm btn-primary" onclick="editBorrowing(${borrowing.id})">
-                    <i class="fas fa-edit"></i>
-                </button>
-            </td>
+            <td>${b.id}</td>
+            <td>${b.book?.title || b.bookTitle || 'N/A'}</td>
+            <td>${b.member?.firstName || b.memberName || 'N/A'}</td>
+            <td>${formatDate(b.borrowDate)}</td>
+            <td>${b.status === 'Returned' ? formatDate(b.returnDate) : calculateDueDate(b)}</td>
+            <td><span class="badge ${getStatusBadgeClass(b.status)}">${b.status}</span></td>
+            <td><button class="btn btn-sm btn-primary" onclick="editBorrowing(${b.id})"><i class="fas fa-edit"></i></button></td>
         </tr>
-        `;
-    }).join('');
+    `).join('') : '<tr><td colspan="7">No borrowings found</td></tr>';
 }
 
-// Helper Functions
+// Helpers
+
 function getAuthHeaders() {
-    return {
-        'Authorization': `Bearer ${localStorage.getItem('token')}`,
-        'Content-Type': 'application/json'
-    };
+    return { 'Authorization': `Bearer ${localStorage.getItem('token')}`, 'Content-Type': 'application/json' };
 }
 
 function formatDate(dateString) {
     return new Date(dateString).toLocaleDateString();
 }
 
-function getStatusBadgeClass(status) {
-    switch (status.toLowerCase()) {
-        case 'available':
-        case 'active':
-            return 'badge-success';
-        case 'borrowed':
-        case 'pending':
-            return 'badge-warning';
-        case 'overdue':
-        case 'inactive':
-            return 'badge-danger';
-        default:
-            return 'badge-secondary';
+function calculateDueDate(b) {
+    if (b.status === 'Borrowed' || b.status === 'Overdue') {
+        const borrowDate = new Date(b.borrowDate);
+        borrowDate.setDate(borrowDate.getDate() + 14);
+        return `Due: ${formatDate(borrowDate)}`;
     }
+    return 'N/A';
 }
 
-function showToast(message, type = 'info') {
-    const toastContainer = document.querySelector('.toast-container');
+function getStatusBadgeClass(status) {
+    const s = status.toLowerCase();
+    if (['available', 'active'].includes(s)) return 'badge-success';
+    if (['borrowed', 'pending'].includes(s)) return 'badge-warning';
+    if (['overdue', 'inactive'].includes(s)) return 'badge-danger';
+    return 'badge-secondary';
+}
+
+function showToast(msg, type = 'info') {
+    const container = document.querySelector('.toast-container');
     const toast = document.createElement('div');
     toast.className = `toast align-items-center text-white bg-${type} border-0`;
-    toast.setAttribute('role', 'alert');
-    toast.setAttribute('aria-live', 'assertive');
-    toast.setAttribute('aria-atomic', 'true');
-    
+    toast.role = 'alert';
     toast.innerHTML = `
         <div class="d-flex">
-            <div class="toast-body">
-                ${message}
-            </div>
+            <div class="toast-body">${msg}</div>
             <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button>
-        </div>
-    `;
-    
-    toastContainer.appendChild(toast);
-    const bsToast = new bootstrap.Toast(toast);
-    bsToast.show();
-    
-    toast.addEventListener('hidden.bs.toast', () => {
-        toast.remove();
-    });
+        </div>`;
+    container.appendChild(toast);
+    new bootstrap.Toast(toast).show();
+    toast.addEventListener('hidden.bs.toast', () => toast.remove());
 }
 
-// Form Handling
-function showBookModal(bookId = null) {
-    const form = document.getElementById('bookForm');
-    form.reset();
-    document.getElementById('bookId').value = bookId || '';
-    
-    if (bookId) {
-        // Load book data for editing
-        fetch(`${BOOKS_API}/${bookId}`, {
-            headers: getAuthHeaders()
-        })
-        .then(response => response.json())
-        .then(book => {
-            document.getElementById('bookTitle').value = book.title;
-            document.getElementById('bookAuthor').value = book.author;
-            document.getElementById('bookIsbn').value = book.isbn;
-            document.getElementById('bookPublisher').value = book.publisher || '';
-            document.getElementById('bookPublicationYear').value = book.publicationYear || new Date().getFullYear();
-            document.getElementById('bookGenre').value = book.genre || '';
-            document.getElementById('bookAvailableCopies').value = book.availableCopies || 0;
-            document.getElementById('bookTotalCopies').value = book.totalCopies || 1;
-        });
+function handleBorrowingStatusChange() {
+    const status = this.value;
+    const returnDateGroup = document.getElementById('returnDateGroup');
+    if (status === 'Returned') {
+        returnDateGroup.style.display = 'block';
+        document.getElementById('returnDate').required = true;
+        document.getElementById('returnDate').value = new Date().toISOString().split('T')[0];
+    } else {
+        returnDateGroup.style.display = 'none';
+        document.getElementById('returnDate').required = false;
     }
-    
+}
+
+// --- CRUD and Modal Functions ---
+// BOOKS CRUD
+function addBook() {
+    document.getElementById('bookForm').reset();
+    document.getElementById('bookId').value = '';
     bookModal.show();
 }
-
-function showMemberModal() {
-    const form = document.getElementById('memberForm');
-    form.reset();
-    document.getElementById('memberId').value = '';
-    
-    // Set default date to today for new members
-    document.getElementById('membershipDate').value = new Date().toISOString().split('T')[0];
-    document.getElementById('memberStatus').value = 'Active';
-    
-    memberModal.show();
+async function editBook(id) {
+    try {
+        const res = await fetch(`${BOOKS_API}/${id}`, { headers: getAuthHeaders() });
+        if (!res.ok) throw new Error('Failed to fetch book');
+        const book = await res.json();
+        document.getElementById('bookId').value = book.id;
+        document.getElementById('bookTitle').value = book.title;
+        document.getElementById('bookAuthor').value = book.author;
+        document.getElementById('bookIsbn').value = book.isbn;
+        document.getElementById('bookPublisher').value = book.publisher || '';
+        document.getElementById('bookPublicationYear').value = book.publicationYear || '';
+        document.getElementById('bookGenre').value = book.genre || '';
+        document.getElementById('bookAvailableCopies').value = book.availableCopies || 0;
+        document.getElementById('bookTotalCopies').value = book.totalCopies || 1;
+        bookModal.show();
+    } catch (err) {
+        showToast('Failed to load book for editing', 'error');
+    }
 }
-
-async function showBorrowingModal() {
-    const form = document.getElementById('borrowingForm');
-    form.reset();
-    document.getElementById('borrowingId').value = '';
-    
-    // Set default dates
-    const today = new Date().toISOString().split('T')[0];
-    const nextMonth = new Date();
-    nextMonth.setMonth(nextMonth.getMonth() + 1);
-    const nextMonthFormatted = nextMonth.toISOString().split('T')[0];
-    
-    document.getElementById('borrowingDate').value = today;
-    document.getElementById('borrowingStatus').value = 'Borrowed';
-    
-    // Load books and members for dropdowns
-    Promise.all([
-        fetch(BOOKS_API, { headers: getAuthHeaders() }).then(r => {
-            if (!r.ok) throw new Error('Failed to load books');
-            return r.json();
-        }),
-        fetch(MEMBERS_API, { headers: getAuthHeaders() }).then(r => {
-            if (!r.ok) throw new Error('Failed to load members');
-            return r.json();
-        })
-    ]).then(([books, membersData]) => {
-        // Ensure books is an array
-        const booksArray = Array.isArray(books) ? books : [];
-        
-        // Ensure members is an array - extract from memberList property
-        let members = [];
-        if (membersData && typeof membersData === 'object') {
-            if (Array.isArray(membersData)) {
-                members = membersData;
-            } else if (Array.isArray(membersData.memberList)) {
-                members = membersData.memberList;
-            }
-        }
-        
-        if (!Array.isArray(members)) {
-            console.error('Invalid members data format for dropdown');
-            showToast('Failed to load members for dropdown', 'error');
-            return;
-        }
-        
-        console.log('Members for dropdown:', members);
-        
-        const bookSelect = document.getElementById('borrowingBook');
-        const memberSelect = document.getElementById('borrowingMember');
-        
-        // Clear existing options
-        bookSelect.innerHTML = '';
-        memberSelect.innerHTML = '';
-        
-        // Add placeholder options
-        const bookPlaceholder = document.createElement('option');
-        bookPlaceholder.value = '';
-        bookPlaceholder.textContent = '-- Select a book --';
-        bookPlaceholder.disabled = true;
-        bookPlaceholder.selected = true;
-        bookSelect.appendChild(bookPlaceholder);
-        
-        const memberPlaceholder = document.createElement('option');
-        memberPlaceholder.value = '';
-        memberPlaceholder.textContent = '-- Select a member --';
-        memberPlaceholder.disabled = true;
-        memberPlaceholder.selected = true;
-        memberSelect.appendChild(memberPlaceholder);
-        
-        // Add book options
-        booksArray.forEach(book => {
-            const option = document.createElement('option');
-            option.value = book.id;
-            option.textContent = book.title;
-            bookSelect.appendChild(option);
-        });
-        
-        // Add member options
-        members.forEach(member => {
-            const option = document.createElement('option');
-            option.value = member.id;
-            option.textContent = `${member.firstName || ''} ${member.lastName || ''}`.trim() || 'Member ' + member.id;
-            memberSelect.appendChild(option);
-        });
-        
-        borrowingModal.show();
-    }).catch(error => {
-        console.error('Failed to load dropdown data:', error);
-        showToast('Failed to load dropdown data', 'error');
-    });
+async function deleteBook(id) {
+    if (!confirm('Are you sure you want to delete this book?')) return;
+    try {
+        const res = await fetch(`${BOOKS_API}/${id}`, { method: 'DELETE', headers: getAuthHeaders() });
+        if (!res.ok) throw new Error('Failed to delete book');
+        showToast('Book deleted', 'success');
+        await loadBooks();
+    } catch (err) {
+        showToast('Failed to delete book', 'error');
+    }
 }
-
 function showSearchModal() {
-    const form = document.getElementById('searchForm');
-    form.reset();
     searchModal.show();
 }
-
-// Form Validation
-function validateEmail(email) {
-    const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    return re.test(email);
-}
-
-function validateForm(formId) {
-    const form = document.getElementById(formId);
-    let isValid = true;
-    
-    // Reset previous validation errors
-    form.querySelectorAll('.invalid-feedback').forEach(el => el.remove());
-    form.querySelectorAll('.is-invalid').forEach(el => el.classList.remove('is-invalid'));
-    
-    // Validate each required field
-    form.querySelectorAll('[required]').forEach(field => {
-        if (!field.value.trim()) {
-            isValid = false;
-            field.classList.add('is-invalid');
-            const feedback = document.createElement('div');
-            feedback.className = 'invalid-feedback';
-            feedback.textContent = `${field.labels[0]?.textContent || 'This field'} is required`;
-            field.parentNode.appendChild(feedback);
-        }
-    });
-    
-    // Additional validation for email fields
-    form.querySelectorAll('input[type="email"]').forEach(emailField => {
-        if (emailField.value.trim() && !validateEmail(emailField.value)) {
-            isValid = false;
-            emailField.classList.add('is-invalid');
-            const feedback = document.createElement('div');
-            feedback.className = 'invalid-feedback';
-            feedback.textContent = 'Please enter a valid email address (e.g., user@example.com)';
-            emailField.parentNode.appendChild(feedback);
-        }
-    });
-    
-    return isValid;
-}
-
-// CRUD Operations
-async function submitBook() {
-    if (!validateForm('bookForm')) {
-        return;
+function showBookModal() {
+    // Clear form if adding new
+    if (!document.getElementById('bookId').value) {
+        document.getElementById('bookForm').reset();
     }
-    
-    const bookId = document.getElementById('bookId').value;
+    bookModal.show();
+}
+async function submitBook() {
+    const id = document.getElementById('bookId').value;
     const book = {
         title: document.getElementById('bookTitle').value,
         author: document.getElementById('bookAuthor').value,
@@ -544,35 +308,92 @@ async function submitBook() {
         availableCopies: parseInt(document.getElementById('bookAvailableCopies').value),
         totalCopies: parseInt(document.getElementById('bookTotalCopies').value)
     };
-    
     try {
-        const response = await fetch(bookId ? `${BOOKS_API}/${bookId}` : BOOKS_API, {
-            method: bookId ? 'PUT' : 'POST',
-            headers: getAuthHeaders(),
-            body: JSON.stringify(book)
-        });
-        
-        if (response.ok) {
-            bookModal.hide();
-            loadBooks();
-            showToast(`Book ${bookId ? 'updated' : 'added'} successfully`, 'success');
+        let res;
+        if (id) {
+            res = await fetch(`${BOOKS_API}/${id}`, {
+                method: 'PUT',
+                headers: getAuthHeaders(),
+                body: JSON.stringify({ ...book, id: parseInt(id) })
+            });
         } else {
-            const errorText = await response.text();
-            console.error('Operation failed:', errorText);
-            showToast(`Operation failed: ${response.status}`, 'error');
+            res = await fetch(BOOKS_API, {
+                method: 'POST',
+                headers: getAuthHeaders(),
+                body: JSON.stringify(book)
+            });
         }
-    } catch (error) {
-        console.error('Book operation failed:', error);
-        showToast('Operation failed', 'error');
+        if (!res.ok) throw new Error('Failed to save book');
+        showToast('Book saved', 'success');
+        bookModal.hide();
+        await loadBooks();
+    } catch (err) {
+        showToast('Failed to save book', 'error');
+    }
+}
+async function searchBooks() {
+    const title = document.getElementById('searchTitle').value;
+    const author = document.getElementById('searchAuthor').value;
+    const isbn = document.getElementById('searchIsbn').value;
+    let url = `${BOOKS_API}/search?`;
+    if (title) url += `title=${encodeURIComponent(title)}&`;
+    if (author) url += `author=${encodeURIComponent(author)}&`;
+    if (isbn) url += `isbn=${encodeURIComponent(isbn)}&`;
+    try {
+        const res = await fetch(url, { headers: getAuthHeaders() });
+        if (!res.ok) throw new Error('Failed to search books');
+        const books = await res.json();
+        renderBooksTable(books);
+        searchModal.hide();
+    } catch (err) {
+        showToast('Failed to search books', 'error');
     }
 }
 
-async function submitMember() {
-    if (!validateForm('memberForm')) {
-        return;
+// MEMBERS CRUD
+function addMember() {
+    document.getElementById('memberForm').reset();
+    document.getElementById('memberId').value = '';
+    memberModal.show();
+}
+async function editMember(id) {
+    try {
+        const res = await fetch(`${MEMBERS_API}/${id}`, { headers: getAuthHeaders() });
+        if (!res.ok) throw new Error('Failed to fetch member');
+        const member = await res.json();
+        document.getElementById('memberId').value = member.id;
+        document.getElementById('memberFirstName').value = member.firstName || '';
+        document.getElementById('memberLastName').value = member.lastName || '';
+        document.getElementById('memberEmail').value = member.email || '';
+        document.getElementById('memberPhone').value = member.phoneNumber || '';
+        document.getElementById('memberAddress').value = member.address || '';
+        document.getElementById('membershipDate').value = member.membershipDate ? member.membershipDate.split('T')[0] : '';
+        document.getElementById('memberStatus').value = member.status || 'Active';
+        memberModal.show();
+    } catch (err) {
+        showToast('Failed to load member for editing', 'error');
     }
-    
-    const memberId = document.getElementById('memberId').value;
+}
+async function deleteMember(id) {
+    if (!confirm('Are you sure you want to delete this member?')) return;
+    try {
+        const res = await fetch(`${MEMBERS_API}/${id}`, { method: 'DELETE', headers: getAuthHeaders() });
+        if (!res.ok) throw new Error('Failed to delete member');
+        showToast('Member deleted', 'success');
+        await loadMembers();
+    } catch (err) {
+        showToast('Failed to delete member', 'error');
+    }
+}
+function showMemberModal() {
+    // Clear form if adding new
+    if (!document.getElementById('memberId').value) {
+        document.getElementById('memberForm').reset();
+    }
+    memberModal.show();
+}
+async function submitMember() {
+    const id = document.getElementById('memberId').value;
     const member = {
         firstName: document.getElementById('memberFirstName').value,
         lastName: document.getElementById('memberLastName').value,
@@ -582,378 +403,155 @@ async function submitMember() {
         membershipDate: document.getElementById('membershipDate').value,
         status: document.getElementById('memberStatus').value
     };
-    
     try {
-        const response = await fetch(memberId ? `${MEMBERS_API}/${memberId}` : MEMBERS_API, {
-            method: memberId ? 'PUT' : 'POST',
-            headers: getAuthHeaders(),
-            body: JSON.stringify(member)
-        });
-        
-        if (response.ok) {
-            memberModal.hide();
-            loadMembers();
-            showToast(`Member ${memberId ? 'updated' : 'added'} successfully`, 'success');
+        let res;
+        if (id) {
+            res = await fetch(`${MEMBERS_API}/${id}`, {
+                method: 'PUT',
+                headers: getAuthHeaders(),
+                body: JSON.stringify({ ...member, id: parseInt(id) })
+            });
         } else {
-            const errorText = await response.text();
-            console.error('Operation failed:', errorText);
-            showToast(`Operation failed: ${response.status}`, 'error');
+            res = await fetch(MEMBERS_API, {
+                method: 'POST',
+                headers: getAuthHeaders(),
+                body: JSON.stringify(member)
+            });
         }
-    } catch (error) {
-        console.error('Member operation failed:', error);
-        showToast('Operation failed', 'error');
+        if (!res.ok) throw new Error('Failed to save member');
+        showToast('Member saved', 'success');
+        memberModal.hide();
+        await loadMembers();
+    } catch (err) {
+        showToast('Failed to save member', 'error');
+    }
+}
+
+// BORROWINGS CRUD
+async function addBorrowing() {
+    await populateBorrowingDropdowns();
+    document.getElementById('borrowingForm').reset();
+    document.getElementById('borrowingId').value = '';
+    document.getElementById('returnDateGroup').style.display = 'none';
+    borrowingModal.show();
+}
+async function editBorrowing(id) {
+    try {
+        await populateBorrowingDropdowns();
+        const res = await fetch(`${BORROWINGS_API}/${id}`, { headers: getAuthHeaders() });
+        if (!res.ok) throw new Error('Failed to fetch borrowing');
+        const borrowing = await res.json();
+        document.getElementById('borrowingId').value = borrowing.id;
+        document.getElementById('borrowingBook').value = borrowing.bookId;
+        document.getElementById('borrowingMember').value = borrowing.memberId;
+        document.getElementById('borrowingDate').value = borrowing.borrowDate ? borrowing.borrowDate.split('T')[0] : '';
+        document.getElementById('borrowingStatus').value = borrowing.status || 'Borrowed';
+        if (borrowing.status === 'Returned') {
+            document.getElementById('returnDateGroup').style.display = 'block';
+            document.getElementById('returnDate').value = borrowing.returnDate ? borrowing.returnDate.split('T')[0] : '';
+        } else {
+            document.getElementById('returnDateGroup').style.display = 'none';
+            document.getElementById('returnDate').value = '';
+        }
+        borrowingModal.show();
+    } catch (err) {
+        showToast('Failed to load borrowing for editing', 'error');
+    }
+}
+
+// Populate dropdowns for borrowing modal
+async function populateBorrowingDropdowns() {
+    // Books
+    try {
+        const booksRes = await fetch(BOOKS_API, { headers: getAuthHeaders() });
+        const books = booksRes.ok ? await booksRes.json() : [];
+        const bookSelect = document.getElementById('borrowingBook');
+        bookSelect.innerHTML = books.length ? books.map(b => `<option value="${b.id}">${b.id} - ${b.title}</option>`).join('') : '<option value="">No books</option>';
+    } catch {
+        document.getElementById('borrowingBook').innerHTML = '<option value="">No books</option>';
+    }
+    // Members
+    try {
+        const membersRes = await fetch(MEMBERS_API, { headers: getAuthHeaders() });
+        const data = membersRes.ok ? await membersRes.json() : { memberList: [] };
+        const members = data.memberList || [];
+        const memberSelect = document.getElementById('borrowingMember');
+        memberSelect.innerHTML = members.length ? members.map(m => `<option value="${m.id}">${m.id} - ${m.firstName} ${m.lastName}</option>`).join('') : '<option value="">No members</option>';
+    } catch {
+        document.getElementById('borrowingMember').innerHTML = '<option value="">No members</option>';
+    }
+}
+
+// Update modal openers in window for global access
+window.addBook = addBook;
+window.editBook = editBook;
+window.addMember = addMember;
+window.editMember = editMember;
+window.addBorrowing = addBorrowing;
+window.editBorrowing = editBorrowing;
+
+// REPORTS
+async function generateReport() {
+    try {
+        const res = await fetch(`${BOOKS_API}/report`, { headers: getAuthHeaders() });
+        if (!res.ok) throw new Error('Failed to generate report');
+        const reportHtml = await res.text();
+        document.getElementById('reportContent').innerHTML = reportHtml;
+        showToast('Report generated', 'success');
+    } catch (err) {
+        showToast('Failed to generate report', 'error');
     }
 }
 
 async function submitBorrowing() {
-    if (!validateForm('borrowingForm')) {
-        return;
-    }
-    
-    const borrowingId = document.getElementById('borrowingId').value;
-    
-    // For new borrowings
-    if (!borrowingId) {
+    const id = document.getElementById('borrowingId').value;
+    if (!id) {
+        // ADD: Only send bookId and memberId
         const borrowing = {
             bookId: parseInt(document.getElementById('borrowingBook').value),
-            memberId: parseInt(document.getElementById('borrowingMember').value),
-            borrowDate: document.getElementById('borrowingDate').value
+            memberId: parseInt(document.getElementById('borrowingMember').value)
         };
-        
         try {
-            const response = await fetch(BORROWINGS_API, {
+            const res = await fetch(BORROWINGS_API, {
                 method: 'POST',
                 headers: getAuthHeaders(),
                 body: JSON.stringify(borrowing)
             });
-            
-            if (response.ok) {
-                borrowingModal.hide();
-                loadBorrowings();
-                showToast('Borrowing added successfully', 'success');
-            } else {
-                const errorText = await response.text();
-                console.error('Operation failed:', errorText);
-                showToast(`Operation failed: ${response.status}`, 'error');
-            }
-        } catch (error) {
-            console.error('Borrowing operation failed:', error);
-            showToast('Operation failed', 'error');
-        }
-    } 
-    // For existing borrowings (returning a book)
-    else {
-        const status = document.getElementById('borrowingStatus').value;
-        
-        // If status is changed to "Returned", use the return endpoint
-        if (status === 'Returned') {
-            try {
-                const response = await fetch(`${BORROWINGS_API}/${borrowingId}/return`, {
-                    method: 'PUT',
-                    headers: getAuthHeaders()
-                });
-                
-                if (response.ok) {
-                    borrowingModal.hide();
-                    loadBorrowings();
-                    showToast('Book returned successfully', 'success');
-                } else {
-                    const errorText = await response.text();
-                    console.error('Return operation failed:', errorText);
-                    showToast(`Return failed: ${response.status}`, 'error');
-                }
-            } catch (error) {
-                console.error('Return operation failed:', error);
-                showToast('Return operation failed', 'error');
-            }
-        } else {
-            // We can't update other borrowing statuses directly
-            showToast('Cannot update borrowing. Use Return option to return a book.', 'warning');
+            if (!res.ok) throw new Error('Failed to save borrowing');
+            showToast('Borrowing saved', 'success');
             borrowingModal.hide();
+            await loadBorrowings();
+        } catch (err) {
+            showToast('Failed to save borrowing', 'error');
         }
-    }
-}
-
-async function searchBooks() {
-    const title = document.getElementById('searchTitle').value;
-    const author = document.getElementById('searchAuthor').value;
-    const isbn = document.getElementById('searchIsbn').value;
-    
-    try {
-        const queryParams = new URLSearchParams();
-        if (title) queryParams.append('title', title);
-        if (author) queryParams.append('author', author);
-        if (isbn) queryParams.append('isbn', isbn);
-        
-        const response = await fetch(`${BOOKS_API}/search?${queryParams}`, {
-            headers: getAuthHeaders()
-        });
-        
-        if (!response.ok) throw new Error('Failed to search books');
-        const books = await response.json();
-        renderBooksTable(books);
-        
-        const modal = bootstrap.Modal.getInstance(document.getElementById('searchModal'));
-        modal.hide();
-        
-        showToast('Search completed', 'success');
-    } catch (error) {
-        console.error('Failed to search books:', error);
-        showToast('Failed to search books', 'error');
-    }
-}
-
-async function deleteBook(id) {
-    if (confirm('Are you sure you want to delete this book?')) {
+    } else {
+        // EDIT/RETURN: Keep existing logic
+        const borrowing = {
+            bookId: parseInt(document.getElementById('borrowingBook').value),
+            memberId: parseInt(document.getElementById('borrowingMember').value),
+            borrowDate: document.getElementById('borrowingDate').value,
+            status: document.getElementById('borrowingStatus').value,
+            returnDate: document.getElementById('returnDate').value || null
+        };
         try {
-            const response = await fetch(`${BOOKS_API}/${id}`, {
-                method: 'DELETE',
-                headers: getAuthHeaders()
-            });
-            
-            if (response.ok) {
-                loadBooks();
-                showToast('Book deleted successfully', 'success');
+            let res;
+            // Only support returning a book (PUT /return)
+            if (borrowing.status === 'Returned') {
+                res = await fetch(`${BORROWINGS_API}/${id}/return`, {
+                    method: 'PUT',
+                    headers: getAuthHeaders(),
+                    body: JSON.stringify(borrowing)
+                });
             } else {
-                showToast('Deletion failed', 'error');
-            }
-        } catch (error) {
-            console.error('Deletion failed:', error);
-            showToast('Deletion failed', 'error');
-        }
-    }
-}
-
-async function deleteMember(id) {
-    if (confirm('Are you sure you want to delete this member?')) {
-        try {
-            // First check if this member has any active borrowings
-            const borrowingsResponse = await fetch(`${BORROWINGS_API}`, {
-                headers: getAuthHeaders()
-            });
-            
-            if (!borrowingsResponse.ok) throw new Error('Failed to check borrowings');
-            
-            const borrowingsData = await borrowingsResponse.json();
-            const borrowings = borrowingsData.borrowingList || borrowingsData;
-            
-            // Check if member has active borrowings
-            const activeBorrowings = borrowings.filter(b => 
-                b.memberId == id && (b.status === 'Borrowed' || b.status === 'Overdue'));
-            
-            if (activeBorrowings.length > 0) {
-                showToast('Cannot delete member with active borrowings. Please return all books first.', 'warning');
+                showToast('Only returning is supported for editing borrowings', 'info');
                 return;
             }
-            
-            const response = await fetch(`${MEMBERS_API}/${id}`, {
-                method: 'DELETE',
-                headers: getAuthHeaders()
-            });
-            
-            if (response.ok) {
-                loadMembers();
-                showToast('Member deleted successfully', 'success');
-            } else {
-                showToast('Deletion failed', 'error');
-            }
-        } catch (error) {
-            console.error('Deletion failed:', error);
-            showToast('Deletion failed', 'error');
+            if (!res.ok) throw new Error('Failed to save borrowing');
+            showToast('Borrowing saved', 'success');
+            borrowingModal.hide();
+            await loadBorrowings();
+        } catch (err) {
+            showToast('Failed to save borrowing', 'error');
         }
     }
 }
-
-async function deleteBorrowing(id) {
-    if (confirm('Are you sure you want to delete this borrowing?')) {
-        try {
-            const response = await fetch(`${BORROWINGS_API}/${id}`, {
-                method: 'DELETE',
-                headers: getAuthHeaders()
-            });
-            
-            if (response.ok) {
-                loadBorrowings();
-                showToast('Borrowing deleted successfully', 'success');
-            } else {
-                showToast('Deletion failed', 'error');
-            }
-        } catch (error) {
-            console.error('Deletion failed:', error);
-            showToast('Deletion failed', 'error');
-        }
-    }
-}
-
-async function editBook(id) {
-    try {
-        const response = await fetch(`${BOOKS_API}/${id}`, {
-            headers: getAuthHeaders()
-        });
-        if (!response.ok) throw new Error('Failed to load book');
-        const book = await response.json();
-        
-        document.getElementById('bookId').value = book.id;
-        document.getElementById('bookTitle').value = book.title;
-        document.getElementById('bookAuthor').value = book.author;
-        document.getElementById('bookIsbn').value = book.isbn;
-        document.getElementById('bookPublisher').value = book.publisher || '';
-        document.getElementById('bookPublicationYear').value = book.publicationYear || new Date().getFullYear();
-        document.getElementById('bookGenre').value = book.genre || '';
-        document.getElementById('bookAvailableCopies').value = book.availableCopies || 0;
-        document.getElementById('bookTotalCopies').value = book.totalCopies || 1;
-        
-        const modal = new bootstrap.Modal(document.getElementById('bookModal'));
-        modal.show();
-    } catch (error) {
-        console.error('Failed to load book:', error);
-        showToast('Failed to load book', 'error');
-    }
-}
-
-async function editMember(id) {
-    try {
-        const response = await fetch(`${MEMBERS_API}/${id}`, {
-            headers: getAuthHeaders()
-        });
-        if (!response.ok) throw new Error('Failed to load member');
-        const member = await response.json();
-        
-        document.getElementById('memberId').value = member.id;
-        document.getElementById('memberFirstName').value = member.firstName || '';
-        document.getElementById('memberLastName').value = member.lastName || '';
-        document.getElementById('memberEmail').value = member.email || '';
-        document.getElementById('memberPhone').value = member.phoneNumber || '';
-        document.getElementById('memberAddress').value = member.address || '';
-        
-        // Format date if it exists, otherwise use today's date
-        const membershipDate = member.membershipDate ? 
-            new Date(member.membershipDate).toISOString().split('T')[0] : 
-            new Date().toISOString().split('T')[0];
-        document.getElementById('membershipDate').value = membershipDate;
-        document.getElementById('memberStatus').value = member.status || 'Active';
-        
-        const modal = new bootstrap.Modal(document.getElementById('memberModal'));
-        modal.show();
-    } catch (error) {
-        console.error('Failed to load member:', error);
-        showToast('Failed to load member', 'error');
-    }
-}
-
-async function editBorrowing(id) {
-    try {
-        const response = await fetch(`${BORROWINGS_API}/${id}`, {
-            headers: getAuthHeaders()
-        });
-        if (!response.ok) throw new Error('Failed to load borrowing');
-        const borrowing = await response.json();
-        
-        document.getElementById('borrowingId').value = borrowing.id;
-        
-        // Load books and members, then set the borrowing details
-        Promise.all([
-            fetch(BOOKS_API, { headers: getAuthHeaders() }).then(r => r.json()),
-            fetch(MEMBERS_API, { headers: getAuthHeaders() }).then(r => r.json())
-        ]).then(([books, membersData]) => {
-            // Ensure books is an array
-            const booksArray = Array.isArray(books) ? books : [];
-            
-            // Ensure members is an array - extract from memberList property 
-            let members = [];
-            if (membersData && typeof membersData === 'object') {
-                if (Array.isArray(membersData)) {
-                    members = membersData;
-                } else if (Array.isArray(membersData.memberList)) {
-                    members = membersData.memberList;
-                }
-            }
-            
-            console.log('Members for dropdown in edit mode:', members);
-            
-            const bookSelect = document.getElementById('borrowingBook');
-            const memberSelect = document.getElementById('borrowingMember');
-            
-            // Clear existing options
-            bookSelect.innerHTML = '';
-            memberSelect.innerHTML = '';
-            
-            // Add book options
-            booksArray.forEach(book => {
-                const option = document.createElement('option');
-                option.value = book.id;
-                option.textContent = book.title;
-                bookSelect.appendChild(option);
-            });
-            
-            // Add member options
-            members.forEach(member => {
-                const option = document.createElement('option');
-                option.value = member.id;
-                option.textContent = `${member.firstName || ''} ${member.lastName || ''}`.trim() || 'Member ' + member.id;
-                memberSelect.appendChild(option);
-            });
-            
-            // Set selected values
-            bookSelect.value = borrowing.bookId;
-            memberSelect.value = borrowing.memberId;
-            
-            // Set dates and status
-            document.getElementById('borrowingDate').value = borrowing.borrowDate.split('T')[0];
-            document.getElementById('borrowingStatus').value = borrowing.status || 'Borrowed';
-            
-            // Handle return date field visibility
-            const returnDateGroup = document.getElementById('returnDateGroup');
-            if (borrowing.status === 'Returned') {
-                returnDateGroup.style.display = 'block';
-                document.getElementById('returnDate').required = true;
-                document.getElementById('returnDate').value = borrowing.returnDate ? 
-                    borrowing.returnDate.split('T')[0] : 
-                    new Date().toISOString().split('T')[0];
-            } else {
-                returnDateGroup.style.display = 'none';
-                document.getElementById('returnDate').required = false;
-            }
-            
-            borrowingModal.show();
-        }).catch(error => {
-            console.error('Failed to load dropdown data:', error);
-            showToast('Failed to load dropdown data for borrowing', 'error');
-        });
-    } catch (error) {
-        console.error('Failed to load borrowing:', error);
-        showToast('Failed to load borrowing', 'error');
-    }
-}
-
-// Report Functions
-async function generateReport() {
-    try {
-        showToast('Generating report...', 'info');
-        
-        const reportContent = document.getElementById('reportContent');
-        reportContent.innerHTML = '<div class="text-center"><div class="spinner-border" role="status"><span class="visually-hidden">Loading...</span></div><p class="mt-3">Generating report...</p></div>';
-        
-        const response = await fetch(`${API_BASE_URL}/api/books/report`, {
-            headers: getAuthHeaders()
-        });
-        
-        if (!response.ok) {
-            throw new Error(`Failed to generate report: ${response.status}`);
-        }
-        
-        const htmlContent = await response.text();
-        reportContent.innerHTML = htmlContent;
-        
-        showToast('Report generated successfully', 'success');
-    } catch (error) {
-        console.error('Failed to generate report:', error);
-        document.getElementById('reportContent').innerHTML = `
-            <div class="alert alert-danger">
-                Failed to generate report: ${error.message}
-                <button class="btn btn-sm btn-outline-danger mt-3" onclick="generateReport()">Try Again</button>
-            </div>
-        `;
-        showToast('Failed to generate report', 'error');
-    }
-} 

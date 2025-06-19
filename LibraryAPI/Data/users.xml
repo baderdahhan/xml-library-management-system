@@ -1,4 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Users xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
-	<User Id="1" Username="admin" PasswordHash="JAvlGPq9JyTdtvBO6x2llnRI1+gxwIyPqCKAn3THIKk=" Role="Admin" />
+  <User Id="1" Username="admin" PasswordHash="JAvlGPq9JyTdtvBO6x2llnRI1+gxwIyPqCKAn3THIKk=" Role="Admin" />
+  <User Id="2" Username="bader" PasswordHash="hhS1GptxXeVo6k1JTCy+ID0mNlG91nKxrRKtAIYl3mA=" Role="Admin" />
 </Users>

@@ -22,7 +22,7 @@ namespace LibraryAPI.Controllers
             _logger = logger;
             _authService = authService;
         }
-
+        
         [HttpPost("login")]
         public IActionResult Login([FromBody] LoginModel model)
         {

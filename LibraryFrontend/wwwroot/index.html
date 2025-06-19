@@ -70,7 +70,7 @@
                     <button class="btn btn-primary me-2" onclick="showSearchModal()">
                         <i class="fas fa-search"></i> Search
                     </button>
-                    <button class="btn btn-success" onclick="showBookModal()">
+                    <button class="btn btn-success" onclick="addBook()">
                         <i class="fas fa-plus"></i> Add Book
                     </button>
                 </div>
@@ -96,7 +96,7 @@
         <div id="membersSection" class="content-section" style="display: none;">
             <div class="d-flex justify-content-between align-items-center mb-4">
                 <h2>Members</h2>
-                <button class="btn btn-success" onclick="showMemberModal()">
+                <button class="btn btn-success" onclick="addMember()">
                     <i class="fas fa-plus"></i> Add Member
                 </button>
             </div>
@@ -120,7 +120,7 @@
         <div id="borrowingsSection" class="content-section" style="display: none;">
             <div class="d-flex justify-content-between align-items-center mb-4">
                 <h2>Borrowings</h2>
-                <button class="btn btn-success" onclick="showBorrowingModal()">
+                <button class="btn btn-success" onclick="addBorrowing()">
                     <i class="fas fa-plus"></i> New Borrowing
                 </button>
             </div>
@@ -195,7 +195,7 @@
                         </div>
                         <div class="mb-3">
                             <label for="bookPublicationYear" class="form-label">Publication Year</label>
-                            <input type="number" class="form-control" id="bookPublicationYear" min="1000" max="2100" required>
+                            <input type="number" class="form-control" id="bookPublicationYear" min="1500" max="2025" required>
                         </div>
                         <div class="mb-3">
                             <label for="bookGenre" class="form-label">Genre</label>
@@ -301,7 +301,7 @@
                             <select class="form-select" id="borrowingStatus" required>
                                 <option value="Borrowed">Borrowed</option>
                                 <option value="Returned">Returned</option>
-                                <option value="Overdue">Overdue</option>
+                                
                             </select>
                         </div>
                         <div class="mb-3" id="returnDateGroup" style="display: none;">

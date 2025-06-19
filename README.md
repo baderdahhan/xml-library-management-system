@@ -159,7 +159,3 @@ The system includes a reporting feature that uses XSLT to transform XML data int
 - HTTPS for secure communication
 - CORS is configured for cross-origin requests
 - Form validation on frontend
-
-## Contributing
-
-Feel free to submit issues and enhancement requests! 

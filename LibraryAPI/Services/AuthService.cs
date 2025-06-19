@@ -33,8 +33,15 @@ namespace LibraryAPI.Services
                             Username = "admin",
                             PasswordHash = HashPassword("admin123"),
                             Role = "Admin"
-                        }
+                        },
 
+                         new User
+                        {
+                            Id = 2,
+                            Username = "bader",
+                            PasswordHash = HashPassword("bader123"),
+                            Role = "Admin"
+                        }
 
                     }
                 };

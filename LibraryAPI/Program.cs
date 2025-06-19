@@ -120,8 +120,8 @@ builder.Services.AddAuthorization();
 var app = builder.Build();
 
 // Static files
-app.UseDefaultFiles();
-app.UseStaticFiles();
+// app.UseDefaultFiles();
+// app.UseStaticFiles();
 
 // Swagger in Development
 if (app.Environment.IsDevelopment())
